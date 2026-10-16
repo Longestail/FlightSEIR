@@ -51,3 +51,21 @@ Note: by default, `pyflightdata` only returns historic data for the past 7 days.
 # Experiments
 
 Run `src/model/early_time_prediction.ipynb` or `src/model/reopen_simulation.ipynb`.
+# Flight network regression tests
+
+Run `python -m unittest discover -s tests -v` from the repository root.
+The tests use synthetic airport and flight records, pandas, and Python's
+standard-library unittest; no API credentials or downloaded flight data are needed.
+
+Airport lookup requires an exact, nonblank string present in the airport table.
+Missing or unrecognized codes raise `ValueError`, stopping construction before
+writing the output file. Both endpoints are checked before adding a flight to
+the in-memory network. Previously processed flights remain in memory on failure;
+this is not a rollback of the entire build. Existing output files are not removed.
+Correct the input/reference data before rerunning; do not treat stale output as
+the result of a failed run. Codes are not silently trimmed or uppercased, and
+duplicate IATA codes retain the existing first-match rule.
+
+The regression suite was verified with Python 3.12.14 and pandas 2.2.3.
+The historical Python 3.7.7/pandas 1.0.5 environment and full research pipeline
+have not been verified with this change.

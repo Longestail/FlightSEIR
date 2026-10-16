@@ -14,17 +14,27 @@ use_country = False
 
 
 def to_node_id(airport):
-    node = airports.loc[(airports['iata'] == airport).idxmax()]
+    """Resolve an exact IATA match, rejecting missing or unknown codes.
+
+    Duplicate codes retain the historical first-match behavior.
+    """
+    if not isinstance(airport, str) or not airport.strip():
+        raise ValueError("Missing or invalid IATA code: {!r}".format(airport))
+    matches = airports.loc[airports['iata'] == airport]
+    if matches.empty:
+        raise ValueError("Unrecognized IATA code: {!r}".format(airport))
+    node = matches.iloc[0]
     return node.city if not use_country and node.country == 'Canada' else node.country
 
 
 def append_flight_to_network(flight):
     if flight['status'] == 'landed' or flight['status'] == 'diverted':
+        # Validate both endpoints before mutating the network.
+        srcId = to_node_id(flight['departure_airport'])
+        desId = to_node_id(flight['arrival_airport'])
         if flight['departure_date'] not in flight_network_by_date.keys():
             flight_network_by_date[flight['departure_date']] = {}
         adj = flight_network_by_date[flight['departure_date']]
-        srcId = to_node_id(flight['departure_airport'])
-        desId = to_node_id(flight['arrival_airport'])
         edge = (srcId, desId)
         if edge not in adj:
             adj[edge] = 0
