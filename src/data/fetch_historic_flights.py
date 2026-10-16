@@ -8,7 +8,6 @@ from pandas.errors import EmptyDataError
 
 from Constants import UNIQUE_FLIGHTS_FILE_PREFIX, \
     HISTORIC_FLIGHTS_FILE_PREFIX, FLIGHTS_ATTRIBUTE_NAMES
-from CustomFlightData import CustomFlightData
 from InfoFilter import InfoFilter
 from flight_converter import to_flight, to_has_more
 from utils import get_logger
@@ -130,6 +129,9 @@ def get_flights_summary_logger(file_name, country):
 def fetch_flight_history(countries,
                          unique_flights_file_prefix=UNIQUE_FLIGHTS_FILE_PREFIX,
                          historic_flights_file_prefix=HISTORIC_FLIGHTS_FILE_PREFIX):
+    # Network construction only needs the status-counting helper above.
+    from CustomFlightData import CustomFlightData
+
     f = CustomFlightData()
     # f.login("username", "password")
     if not countries:
